@@ -14,9 +14,22 @@
 		EDA37B052E75B48E0039FB1D /* pregwo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pregwo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EDA37B352E7607920039FB1D /* Exceptions for "pregwo" folder in "pregwo" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EDA37B042E75B48E0039FB1D /* pregwo */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EDA37B072E75B48E0039FB1D /* pregwo */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EDA37B352E7607920039FB1D /* Exceptions for "pregwo" folder in "pregwo" target */,
+			);
 			path = pregwo;
 			sourceTree = "<group>";
 		};
@@ -265,8 +278,12 @@
 				DEVELOPMENT_TEAM = R97T42N8LN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = pregwo/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "i need this plz";
+				INFOPLIST_KEY_NSFileProviderDomainUsageDescription = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "i need this too";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "I need this too";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -295,8 +312,12 @@
 				DEVELOPMENT_TEAM = R97T42N8LN;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = pregwo/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "i need this plz";
+				INFOPLIST_KEY_NSFileProviderDomainUsageDescription = "$(MARKETING_VERSION)";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "i need this too";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "I need this too";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

@@ -110,7 +110,13 @@ struct ARViewContainer: UIViewRepresentable {
                             // Get response and update the card's texture
                             Task { [weak self] in
                                 guard let self = self, let img = image else { return }
-                                let response = await self.geminiService.generateResponse(for: img)
+                                let response = await self.geminiService.generateIsolatedResponse(
+                                    for: img,
+                                    conversation: [
+                                        "You are an AI assistant seeing the world through the user's camera. Respond conversationally and do not mention 'the image'.",
+                                        "what is the object in users hand"
+                                    ]
+                                )
 
                                 DispatchQueue.main.async {
                                     self.updateCardTexture(with: response)

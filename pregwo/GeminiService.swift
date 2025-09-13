@@ -1,42 +1,27 @@
 import SwiftUI
 import GoogleGenerativeAI
+import Combine
 
-@Observable
-class GeminiService {
+class GeminiService: ObservableObject {
     private var generativeModel: GenerativeModel?
-    var result: String?
-    var inProgress = false
+    private var chat: Chat?
+    @Published var result: String?
+    @Published var inProgress = false
 
     init() {
-        // Initialize the generative model with the API key and a model name
-        // The model name is a placeholder and should be updated to a supported model
         generativeModel = GenerativeModel(name: "gemini-1.5-flash-latest", apiKey: APIKey.default)
     }
 
-    @MainActor
-    func sendImage(_ image: UIImage) async {
-        guard let model = generativeModel else {
-            result = "Generative model not available."
-            return
-        }
+    func startChat() {
+        self.chat = generativeModel?.startChat()
+    }
 
-        inProgress = true
-        defer { inProgress = false }
-
-        do {
-            let response = try await model.generateContent("what is the object in users hand", image)
-            if let text = response.text {
-                result = text
-            } else {
-                result = "No response text found."
-            }
-        } catch {
-            result = "Error: \(error.localizedDescription)"
-        }
+    func endChat() {
+        self.chat = nil
     }
 
     @MainActor
-    func generateResponse(for image: UIImage) async -> String {
+    func generateIsolatedResponse(for image: UIImage, conversation: [String]) async -> String {
         guard let model = generativeModel else {
             let errorText = "Generative model not available."
             self.result = errorText
@@ -46,8 +31,40 @@ class GeminiService {
         inProgress = true
         defer { inProgress = false }
 
+        let prompt = conversation.joined(separator: "\n")
+
         do {
-            let response = try await model.generateContent("what is the object in users hand", image)
+            let response = try await model.generateContent(prompt, image)
+            let resultText = response.text ?? "No response text found."
+            self.result = resultText
+            return resultText
+        } catch {
+            let errorText = "Error: \(error.localizedDescription)"
+            self.result = errorText
+            return errorText
+        }
+    }
+
+    @MainActor
+    func sendChatMessage(for image: UIImage, message: String) async -> String {
+        guard let chat = self.chat else {
+            let errorText = "Chat session not started."
+            self.result = errorText
+            return errorText
+        }
+
+        inProgress = true
+        defer { inProgress = false }
+
+        var fullMessage = message
+        // If this is the first message from the user, prepend the system instruction.
+        if chat.history.isEmpty {
+            let systemInstruction = "You are on a video call. The user is showing you things through their camera. Respond to their questions naturally and conversationally. Do not refer to what you see as 'the image' or 'the picture'."
+            fullMessage = "\(systemInstruction)\n\nUser: \(message)"
+        }
+
+        do {
+            let response = try await chat.sendMessage(fullMessage, image)
             let resultText = response.text ?? "No response text found."
             self.result = resultText
             return resultText
