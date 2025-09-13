@@ -7,15 +7,13 @@
 
 import SwiftUI
 
-extension CameraManager: ObservableObject {}
-
 struct ContentView: View {
-    @StateObject private var cameraManager = CameraManager()
     @State private var geminiService = GeminiService()
+    @State private var clearSignal = 0
 
     var body: some View {
         ZStack {
-            CameraView(cameraManager: cameraManager)
+            ARViewContainer(geminiService: geminiService, clearSignal: clearSignal)
                 .ignoresSafeArea()
 
             VStack {
@@ -34,13 +32,14 @@ struct ContentView: View {
                     .padding()
                     .background(Color.black.opacity(0.7))
                     .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding()
+                    .cornerRadius(10)
+                    .padding()
                 }
             }
         }
-        .onAppear {
-            cameraManager.geminiService = geminiService
+        .onShake {
+            geminiService.result = nil
+            clearSignal += 1
         }
     }
 }
