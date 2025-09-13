@@ -8,17 +8,27 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var geminiService = GeminiService()
-    @State private var clearSignal = 0
+    @State private var selectedTab = "Video"
 
     var body: some View {
-        ZStack {
-            ARViewContainer(geminiService: geminiService, clearSignal: clearSignal)
-                .ignoresSafeArea()
-        }
-        .onShake {
-            geminiService.result = nil
-            clearSignal += 1
+        TabView(selection: $selectedTab) {
+            FoodView()
+                .tabItem {
+                    Label("Food", systemImage: "fork.knife")
+                }
+                .tag("Food")
+
+            MainARView(isActive: selectedTab == "Video")
+                .tabItem {
+                    Label("Video", systemImage: "video.fill")
+                }
+                .tag("Video")
+
+            SettingsView()
+                .tabItem {
+                    Label("Settings", systemImage: "gear")
+                }
+                .tag("Settings")
         }
     }
 }

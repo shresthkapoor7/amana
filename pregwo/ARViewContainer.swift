@@ -6,22 +6,30 @@ import Vision
 struct ARViewContainer: UIViewRepresentable {
     var geminiService: GeminiService
     var clearSignal: Int
+    var isActive: Bool
 
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
         context.coordinator.arView = arView
-
-        let config = ARWorldTrackingConfiguration()
-        config.planeDetection = [.horizontal]
-        arView.session.run(config)
-
         arView.session.delegate = context.coordinator
+
+        // Don't start the session here; let updateUIView manage it.
 
         return arView
     }
 
     func updateUIView(_ uiView: ARView, context: Context) {
         context.coordinator.checkForClear(signal: clearSignal)
+
+        if isActive {
+            // Ensure the session is running when the view is active.
+            let config = ARWorldTrackingConfiguration()
+            config.planeDetection = [.horizontal]
+            uiView.session.run(config)
+        } else {
+            // Pause the session when the view is inactive.
+            uiView.session.pause()
+        }
     }
 
     func makeCoordinator() -> Coordinator {
