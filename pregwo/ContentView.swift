@@ -15,27 +15,6 @@ struct ContentView: View {
         ZStack {
             ARViewContainer(geminiService: geminiService, clearSignal: clearSignal)
                 .ignoresSafeArea()
-
-            VStack {
-                Spacer()
-
-                if geminiService.inProgress {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .white))
-                        .scaleEffect(2)
-                        .padding()
-                } else if let result = geminiService.result {
-                    ScrollView {
-                        Text(result)
-                            .padding()
-                    }
-                    .padding()
-                    .background(Color.black.opacity(0.7))
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-                    .padding()
-                }
-            }
         }
         .onShake {
             geminiService.result = nil

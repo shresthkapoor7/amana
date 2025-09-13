@@ -34,4 +34,27 @@ class GeminiService {
             result = "Error: \(error.localizedDescription)"
         }
     }
+
+    @MainActor
+    func generateResponse(for image: UIImage) async -> String {
+        guard let model = generativeModel else {
+            let errorText = "Generative model not available."
+            self.result = errorText
+            return errorText
+        }
+
+        inProgress = true
+        defer { inProgress = false }
+
+        do {
+            let response = try await model.generateContent("what is the object in users hand", image)
+            let resultText = response.text ?? "No response text found."
+            self.result = resultText
+            return resultText
+        } catch {
+            let errorText = "Error: \(error.localizedDescription)"
+            self.result = errorText
+            return errorText
+        }
+    }
 }

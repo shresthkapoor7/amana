@@ -89,17 +89,25 @@ struct ARViewContainer: UIViewRepresentable {
                         }
 
                         if let timestamp = handDetectionTimestamp, Date().timeIntervalSince(timestamp) >= 2 {
+                            let image = imageFromPixelBuffer(frame.capturedImage)
+
+                            // Place a placeholder card immediately
                             DispatchQueue.main.async { [weak self] in
                                 guard let self = self, let arView = self.arView else { return }
-                                self.placeAnchor(for: observation, in: arView, frame: frame)
+                                self.placeNewCard(for: observation, in: arView, frame: frame)
                             }
 
-                            if let image = imageFromPixelBuffer(frame.capturedImage) {
-                                Task {
-                                    await geminiService.sendImage(image)
+                            handDetectionTimestamp = nil
+
+                            // Get response and update the card's texture
+                            Task { [weak self] in
+                                guard let self = self, let img = image else { return }
+                                let response = await self.geminiService.generateResponse(for: img)
+
+                                DispatchQueue.main.async {
+                                    self.updateCardTexture(with: response)
                                 }
                             }
-                            handDetectionTimestamp = nil
                         }
                     }
                 } else {
@@ -111,7 +119,8 @@ struct ARViewContainer: UIViewRepresentable {
             }
         }
 
-        private func placeAnchor(for observation: VNHumanHandPoseObservation, in arView: ARView, frame: ARFrame) {
+        @MainActor
+        private func placeNewCard(for observation: VNHumanHandPoseObservation, in arView: ARView, frame: ARFrame) {
             do {
                 let allPoints = try observation.recognizedPoints(.all).filter { $0.value.confidence > 0.3 }
                 guard !allPoints.isEmpty else { return }
@@ -128,13 +137,11 @@ struct ARViewContainer: UIViewRepresentable {
 
                 var finalTransform: simd_float4x4?
 
-                // Prioritize finding a real-world plane
                 if let result = arView.raycast(from: viewPoint, allowing: .estimatedPlane, alignment: .any).first {
                     finalTransform = result.worldTransform
                 } else {
-                    // Fallback to placing the object at a fixed distance if no plane is found
                     if let ray = arView.ray(through: viewPoint) {
-                        let distance: Float = 0.5 // 50cm in front of the camera
+                        let distance: Float = 0.5
                         let worldPosition = ray.origin + ray.direction * distance
                         finalTransform = Transform(translation: worldPosition).matrix
                     }
@@ -146,46 +153,55 @@ struct ARViewContainer: UIViewRepresentable {
                     arView.scene.removeAnchor(existingAnchor)
                 }
 
-                // Create an anchor at the determined position
                 let newAnchor = AnchorEntity(world: transform)
 
-                // Create the card entity
-                let cardWidth: Float = 0.2
-                let cardHeight: Float = 0.07
-                let cardPlane = MeshResource.generatePlane(width: cardWidth, height: cardHeight, cornerRadius: 0.01)
-                let cardMaterial = UnlitMaterial(color: UIColor.black.withAlphaComponent(0.75))
+                let cardWidth: Float = 0.25
+                let cardHeight: Float = 0.25
+                let cardPlane = MeshResource.generatePlane(width: cardWidth, height: cardHeight, cornerRadius: 0.02)
+                let cardMaterial = UnlitMaterial(color: UIColor.darkGray.withAlphaComponent(0.8))
                 let cardEntity = ModelEntity(mesh: cardPlane, materials: [cardMaterial])
+                cardEntity.name = "geminiCard"
 
-                // Create the text entity
-                let textMesh = MeshResource.generateText("user hand was here",
-                                                         extrusionDepth: 0.001,
-                                                         font: .systemFont(ofSize: 0.015))
-                let textMaterial = UnlitMaterial(color: .white)
-                let textEntity = ModelEntity(mesh: textMesh, materials: [textMaterial])
-
-                // Position the text relative to the card
-                let textBounds = textEntity.visualBounds(relativeTo: nil)
-                let textWidth = textBounds.max.x - textBounds.min.x
-                textEntity.position = SIMD3<Float>(-textWidth / 2, -0.015 / 2, 0.001)
-
-                // Add text as a child of the card
-                cardEntity.addChild(textEntity)
-
-                // Add a billboard component to make the card always face the camera
                 cardEntity.components.set(BillboardComponent())
-
-                // The plane's front face is +Z, but billboard faces -Z to the camera.
-                // Rotate the card 180 degrees so its front is visible.
                 cardEntity.transform.rotation = simd_quatf(angle: .pi, axis: [0, 1, 0])
 
-                // Add the card to the anchor
                 newAnchor.addChild(cardEntity)
-
                 arView.scene.addAnchor(newAnchor)
                 self.cardAnchor = newAnchor
 
             } catch {
                 print("Could not get wrist points: \(error)")
+            }
+        }
+
+        @MainActor
+        private func updateCardTexture(with markdownText: String) {
+            guard let cardAnchor = self.cardAnchor,
+                  let cardEntity = cardAnchor.findEntity(named: "geminiCard") as? ModelEntity else { return }
+
+            guard let textureImage = MarkdownRenderer.render(markdown: markdownText),
+                  let cgImage = textureImage.cgImage else { return }
+
+            // Calculate the aspect ratio of the rendered image
+            let imageSize = textureImage.size
+            let aspectRatio = imageSize.height / imageSize.width
+
+            // Define a fixed width for the card and calculate the height based on the aspect ratio
+            let cardWidth: Float = 0.25
+            let cardHeight = cardWidth * Float(aspectRatio)
+
+            // Create a new plane mesh with the correct dimensions
+            let newPlane = MeshResource.generatePlane(width: cardWidth, height: cardHeight, cornerRadius: 0.02)
+            cardEntity.model?.mesh = newPlane
+
+            do {
+                let texture = try TextureResource.generate(from: cgImage, options: .init(semantic: .color))
+                var newMaterial = UnlitMaterial()
+                newMaterial.color = .init(texture: .init(texture))
+
+                cardEntity.model?.materials = [newMaterial]
+            } catch {
+                print("Failed to create texture for card: \(error)")
             }
         }
 
