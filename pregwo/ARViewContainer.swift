@@ -146,37 +146,40 @@ struct ARViewContainer: UIViewRepresentable {
                     arView.scene.removeAnchor(existingAnchor)
                 }
 
+                // Create an anchor at the determined position
                 let newAnchor = AnchorEntity(world: transform)
-                newAnchor.look(at: arView.cameraTransform.translation, from: newAnchor.position, relativeTo: nil)
 
-                // Card background
+                // Create the card entity
                 let cardWidth: Float = 0.2
                 let cardHeight: Float = 0.07
                 let cardPlane = MeshResource.generatePlane(width: cardWidth, height: cardHeight, cornerRadius: 0.01)
-                var cardMaterial = SimpleMaterial(color: .black, isMetallic: false)
-                cardMaterial.color = .init(tint: .black.withAlphaComponent(0.75))
+                let cardMaterial = UnlitMaterial(color: UIColor.black.withAlphaComponent(0.75))
                 let cardEntity = ModelEntity(mesh: cardPlane, materials: [cardMaterial])
 
-                // Card text
+                // Create the text entity
                 let textMesh = MeshResource.generateText("user hand was here",
                                                          extrusionDepth: 0.001,
                                                          font: .systemFont(ofSize: 0.015))
-                let textMaterial = SimpleMaterial(color: .white, isMetallic: false)
+                let textMaterial = UnlitMaterial(color: .white)
                 let textEntity = ModelEntity(mesh: textMesh, materials: [textMaterial])
 
-                // Flip the text to ensure it's not mirrored
-                textEntity.transform.rotation = simd_quatf(angle: .pi, axis: [0, 1, 0])
-
-                // Center the text on the card
+                // Position the text relative to the card
                 let textBounds = textEntity.visualBounds(relativeTo: nil)
                 let textWidth = textBounds.max.x - textBounds.min.x
-                textEntity.position.x = textWidth / 2
-                textEntity.position.y = -0.015 / 2
-                textEntity.position.z = 0.001 // Slightly in front of the card's surface
+                textEntity.position = SIMD3<Float>(-textWidth / 2, -0.015 / 2, 0.001)
 
-                // Assemble and add to scene
+                // Add text as a child of the card
+                cardEntity.addChild(textEntity)
+
+                // Add a billboard component to make the card always face the camera
+                cardEntity.components.set(BillboardComponent())
+
+                // The plane's front face is +Z, but billboard faces -Z to the camera.
+                // Rotate the card 180 degrees so its front is visible.
+                cardEntity.transform.rotation = simd_quatf(angle: .pi, axis: [0, 1, 0])
+
+                // Add the card to the anchor
                 newAnchor.addChild(cardEntity)
-                newAnchor.addChild(textEntity)
 
                 arView.scene.addAnchor(newAnchor)
                 self.cardAnchor = newAnchor
