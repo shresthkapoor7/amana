@@ -12,11 +12,11 @@ struct ContentView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            FoodView()
+            CallView()
                 .tabItem {
-                    Label("Food", systemImage: "fork.knife")
+                    Label("Call", systemImage: "phone.fill")
                 }
-                .tag("Food")
+                .tag("Call")
 
             MainARView(isActive: selectedTab == "Video")
                 .tabItem {

@@ -1,8 +1,8 @@
 import SwiftUI
 
-struct FoodView: View {
+struct CallView: View {
     var body: some View {
-        Text("Food Tab")
+        Text("Call Tab")
             .font(.largeTitle)
     }
 }
