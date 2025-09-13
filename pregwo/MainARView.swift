@@ -1,13 +1,14 @@
 import SwiftUI
 
 struct MainARView: View {
-    @State private var geminiService = GeminiService()
+    @ObservedObject var geminiService: GeminiService
     @State private var clearSignal = 0
     var isActive: Bool
+    @Binding var selectedTab: String
 
     var body: some View {
         ZStack {
-            ARViewContainer(geminiService: geminiService, clearSignal: clearSignal, isActive: isActive)
+            ARViewContainer(geminiService: geminiService, clearSignal: clearSignal, isActive: isActive, selectedTab: $selectedTab)
                 .ignoresSafeArea()
         }
         .onShake {

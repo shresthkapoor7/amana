@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var selectedTab = "Video"
+    @StateObject private var geminiService = GeminiService()
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -18,11 +19,21 @@ struct ContentView: View {
                 }
                 .tag("Call")
 
-            MainARView(isActive: selectedTab == "Video")
+            MainARView(geminiService: geminiService, isActive: selectedTab == "Video", selectedTab: $selectedTab)
                 .tabItem {
                     Label("Video", systemImage: "video.fill")
                 }
                 .tag("Video")
+
+            ChatView(messages: $geminiService.messages) { message in
+                Task {
+                    await geminiService.sendChatMessage(message: message)
+                }
+            }
+            .tabItem {
+                Label("Chat", systemImage: "message.fill")
+            }
+            .tag("Chat")
 
             SettingsView()
                 .tabItem {

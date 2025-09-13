@@ -2,16 +2,21 @@ import SwiftUI
 import ARKit
 import RealityKit
 import Vision
+import Combine
 
 struct ARViewContainer: UIViewRepresentable {
-    var geminiService: GeminiService
+    @ObservedObject var geminiService: GeminiService
     var clearSignal: Int
     var isActive: Bool
+    @Binding var selectedTab: String
 
     func makeUIView(context: Context) -> ARView {
         let arView = ARView(frame: .zero)
         context.coordinator.arView = arView
         arView.session.delegate = context.coordinator
+
+        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(Coordinator.handleTap))
+        arView.addGestureRecognizer(tapGesture)
 
         // Don't start the session here; let updateUIView manage it.
 
@@ -33,22 +38,40 @@ struct ARViewContainer: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(geminiService: geminiService, initialClearSignal: clearSignal)
+        Coordinator(geminiService: geminiService, initialClearSignal: clearSignal, selectedTab: $selectedTab)
     }
 
     class Coordinator: NSObject, ARSessionDelegate {
         weak var arView: ARView?
         var geminiService: GeminiService
+        @Binding var selectedTab: String
 
         private var handPoseRequest = VNDetectHumanHandPoseRequest()
         private var handDetectionTimestamp: Date?
         private var isProcessingFrame = false
         private var cardAnchor: AnchorEntity?
         private var lastClearSignal: Int
+        private var cancellables = Set<AnyCancellable>()
 
-        init(geminiService: GeminiService, initialClearSignal: Int) {
+        init(geminiService: GeminiService, initialClearSignal: Int, selectedTab: Binding<String>) {
             self.geminiService = geminiService
             self.lastClearSignal = initialClearSignal
+            self._selectedTab = selectedTab
+        }
+
+        @objc func handleTap(_ sender: UITapGestureRecognizer) {
+            guard let arView = self.arView else { return }
+
+            let location = sender.location(in: arView)
+            if arView.entity(at: location) != nil {
+                if let message = geminiService.result {
+                    geminiService.clearMessages()
+                    Task {
+                        await geminiService.sendChatMessage(message: "expand on this: \(message)")
+                    }
+                    selectedTab = "Chat"
+                }
+            }
         }
 
         func checkForClear(signal: Int) {
@@ -175,6 +198,11 @@ struct ARViewContainer: UIViewRepresentable {
                 let cardMaterial = UnlitMaterial(color: UIColor.darkGray.withAlphaComponent(0.8))
                 let cardEntity = ModelEntity(mesh: cardPlane, materials: [cardMaterial])
                 cardEntity.name = "geminiCard"
+
+                // Add a collision component to the card entity to enable tap detection
+                let cardBounds = cardEntity.visualBounds(relativeTo: cardEntity)
+                cardEntity.collision = CollisionComponent(shapes: [ShapeResource.generateBox(size: cardBounds.extents).offsetBy(translation: cardBounds.center)])
+                cardEntity.components.set(InputTargetComponent())
 
                 cardEntity.components.set(BillboardComponent())
                 cardEntity.transform.rotation = simd_quatf(angle: .pi, axis: [0, 1, 0])

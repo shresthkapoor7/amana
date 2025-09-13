@@ -87,7 +87,7 @@ struct CallView: View {
                         guard let image = image else { return }
 
                         Task {
-                            let response = await geminiService.sendChatMessage(
+                            let response = await geminiService.sendChatMessageWithImage(
                                 for: image,
                                 message: lastMessage
                             )

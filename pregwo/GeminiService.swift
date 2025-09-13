@@ -7,9 +7,11 @@ class GeminiService: ObservableObject {
     private var chat: Chat?
     @Published var result: String?
     @Published var inProgress = false
+    @Published var messages: [ChatMessage] = []
 
     init() {
         generativeModel = GenerativeModel(name: "gemini-1.5-flash-latest", apiKey: APIKey.default)
+        startChat()
     }
 
     func startChat() {
@@ -18,6 +20,10 @@ class GeminiService: ObservableObject {
 
     func endChat() {
         self.chat = nil
+    }
+
+    func clearMessages() {
+        messages = []
     }
 
     @MainActor
@@ -46,7 +52,7 @@ class GeminiService: ObservableObject {
     }
 
     @MainActor
-    func sendChatMessage(for image: UIImage, message: String) async -> String {
+    func sendChatMessageWithImage(for image: UIImage, message: String) async -> String {
         guard let chat = self.chat else {
             let errorText = "Chat session not started."
             self.result = errorText
@@ -72,6 +78,33 @@ class GeminiService: ObservableObject {
             let errorText = "Error: \(error.localizedDescription)"
             self.result = errorText
             return errorText
+        }
+    }
+
+    @MainActor
+    func sendChatMessage(message: String) async {
+        guard let chat = self.chat else {
+            let errorText = "Chat session not started."
+            let errorMessage = ChatMessage(text: errorText, isFromUser: false)
+            self.messages.append(errorMessage)
+            return
+        }
+
+        inProgress = true
+        defer { inProgress = false }
+
+        let userMessage = ChatMessage(text: message, isFromUser: true)
+        self.messages.append(userMessage)
+
+        do {
+            let response = try await chat.sendMessage(message)
+            let resultText = response.text ?? "No response text found."
+            let modelMessage = ChatMessage(text: resultText, isFromUser: false)
+            self.messages.append(modelMessage)
+        } catch {
+            let errorText = "Error: \(error.localizedDescription)"
+            let errorMessage = ChatMessage(text: errorText, isFromUser: false)
+            self.messages.append(errorMessage)
         }
     }
 }
