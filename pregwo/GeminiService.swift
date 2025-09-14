@@ -15,7 +15,14 @@ class GeminiService: ObservableObject {
     }
 
     func startChat() {
-        self.chat = generativeModel?.startChat()
+        self.chat = generativeModel?.startChat(history: [
+            ModelContent(role: "user", parts: [
+                .text("You are an AI assistant. Format your responses in markdown.")
+            ]),
+            ModelContent(role: "model", parts: [
+                .text("OK, I will format all my responses in markdown.")
+            ])
+        ])
     }
 
     func endChat() {

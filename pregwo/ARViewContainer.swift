@@ -195,7 +195,18 @@ struct ARViewContainer: UIViewRepresentable {
                 let cardWidth: Float = 0.25
                 let cardHeight: Float = 0.25
                 let cardPlane = MeshResource.generatePlane(width: cardWidth, height: cardHeight, cornerRadius: 0.02)
-                let cardMaterial = UnlitMaterial(color: UIColor.darkGray.withAlphaComponent(0.8))
+
+                var cardMaterial = UnlitMaterial(color: UIColor.darkGray.withAlphaComponent(0.8))
+                if let loaderImage = createLoaderTexture(), let cgImage = loaderImage.cgImage {
+                    do {
+                        let texture = try TextureResource.generate(from: cgImage, options: .init(semantic: .color))
+                        cardMaterial.color = .init(texture: .init(texture))
+                        cardMaterial.blending = .transparent(opacity: .init(floatLiteral: 1.0))
+                    } catch {
+                        print("Failed to create loader texture: \(error)")
+                    }
+                }
+
                 let cardEntity = ModelEntity(mesh: cardPlane, materials: [cardMaterial])
                 cardEntity.name = "geminiCard"
 
@@ -246,6 +257,27 @@ struct ARViewContainer: UIViewRepresentable {
             } catch {
                 print("Failed to create texture for card: \(error)")
             }
+        }
+
+        @MainActor
+        private func createLoaderTexture() -> UIImage? {
+            let loaderView = UIActivityIndicatorView(style: .large)
+            loaderView.color = .white
+            loaderView.startAnimating()
+            loaderView.frame = CGRect(x: 0, y: 0, width: 128, height: 128)
+
+            let containerView = UIView(frame: loaderView.frame)
+            containerView.backgroundColor = UIColor.darkGray.withAlphaComponent(0.8)
+            containerView.layer.cornerRadius = 16
+            containerView.addSubview(loaderView)
+            loaderView.center = containerView.center
+
+            UIGraphicsBeginImageContextWithOptions(containerView.bounds.size, false, 0.0)
+            containerView.layer.render(in: UIGraphicsGetCurrentContext()!)
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+
+            return image
         }
 
         private func imageFromPixelBuffer(_ pixelBuffer: CVPixelBuffer) -> UIImage? {

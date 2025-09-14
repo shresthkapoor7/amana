@@ -19,7 +19,7 @@ struct ChatView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
                             } else {
-                                Text(message.text)
+                                Text(LocalizedStringKey(message.text))
                                     .padding(10)
                                     .background(Color(UIColor.systemGray5))
                                     .cornerRadius(10)
