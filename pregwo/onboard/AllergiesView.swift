@@ -45,7 +45,17 @@ struct AllergiesView: View {
             
             NavigationLink(destination: AnythingView()) {
                 Text("Next")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
             }
+            .padding(.horizontal)
             .simultaneousGesture(TapGesture().onEnded {
                 saveAllergies()
             })

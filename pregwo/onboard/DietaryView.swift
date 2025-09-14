@@ -21,19 +21,28 @@ struct DietaryView: View {
                 .font(.title)
                 .padding()
             
-            List(restrictions, id: \.self) { restriction in
-                Button(action: {
-                    if selectedRestrictions.contains(restriction) {
-                        selectedRestrictions.removeAll { $0 == restriction }
-                    } else {
-                        selectedRestrictions.append(restriction)
-                    }
-                }) {
-                    HStack {
-                        Text(restriction)
-                        if selectedRestrictions.contains(restriction) {
-                            Spacer()
-                            Image(systemName: "checkmark")
+            Text("You can select multiple restrictions.")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .padding(.bottom)
+            
+            List {
+                ForEach(restrictions, id: \.self) { restriction in
+                    Button(action: {
+                        if self.selectedRestrictions.contains(restriction) {
+                            self.selectedRestrictions.removeAll { $0 == restriction }
+                        } else {
+                            self.selectedRestrictions.append(restriction)
+                        }
+                    }) {
+                        HStack {
+                            Text(restriction)
+                                .foregroundColor(.primary)
+                            if self.selectedRestrictions.contains(restriction) {
+                                Spacer()
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.accentColor)
+                            }
                         }
                     }
                 }
@@ -45,7 +54,17 @@ struct DietaryView: View {
             
             NavigationLink(destination: AllergiesView()) {
                 Text("Next")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
             }
+            .padding(.horizontal)
             .simultaneousGesture(TapGesture().onEnded {
                 saveRestrictions()
             })

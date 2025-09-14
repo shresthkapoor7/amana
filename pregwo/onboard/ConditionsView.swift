@@ -17,20 +17,28 @@ struct ConditionsView: View {
             Text("Do you have any of the following conditions?")
                 .font(.title)
                 .padding()
+            Text("You can select multiple conditions.")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .padding(.bottom)
             
-            List(conditions, id: \.self) { condition in
-                Button(action: {
-                    if selectedConditions.contains(condition) {
-                        selectedConditions.removeAll { $0 == condition }
-                    } else {
-                        selectedConditions.append(condition)
-                    }
-                }) {
-                    HStack {
-                        Text(condition)
-                        if selectedConditions.contains(condition) {
-                            Spacer()
-                            Image(systemName: "checkmark")
+            List {
+                ForEach(conditions, id: \.self) { condition in
+                    Button(action: {
+                        if self.selectedConditions.contains(condition) {
+                            self.selectedConditions.removeAll { $0 == condition }
+                        } else {
+                            self.selectedConditions.append(condition)
+                        }
+                    }) {
+                        HStack {
+                            Text(condition)
+                                .foregroundColor(.primary)
+                            if self.selectedConditions.contains(condition) {
+                                Spacer()
+                                Image(systemName: "checkmark")
+                                    .foregroundColor(.accentColor)
+                            }
                         }
                     }
                 }
@@ -56,9 +64,6 @@ struct ConditionsView: View {
             .simultaneousGesture(TapGesture().onEnded {
                 saveConditions()
             })
-        }
-        .onTapGesture {
-            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     

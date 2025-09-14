@@ -24,14 +24,17 @@ struct AnythingView: View {
                 isFirstTime = false
             }) {
                 Text("Finish")
-                    .font(.headline)
-                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
                     .padding()
-                    .frame(width: 220, height: 60)
-                    .background(Color.blue)
-                    .cornerRadius(15.0)
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
             }
-            .padding()
+            .padding(.horizontal)
         }
         .padding()
     }
