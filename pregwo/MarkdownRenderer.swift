@@ -14,6 +14,7 @@ class MarkdownRenderer {
             .multilineTextAlignment(.leading)
 
         let renderer = ImageRenderer(content: markdownView)
+        renderer.isOpaque = false
         renderer.scale = 2.0 // Render at 2x for high quality
         return renderer.uiImage
     }

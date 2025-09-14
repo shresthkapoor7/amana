@@ -240,6 +240,7 @@ struct ARViewContainer: UIViewRepresentable {
                 let texture = try TextureResource.generate(from: cgImage, options: .init(semantic: .color))
                 var newMaterial = UnlitMaterial()
                 newMaterial.color = .init(texture: .init(texture))
+                newMaterial.blending = .transparent(opacity: .init(floatLiteral: 1.0))
 
                 cardEntity.model?.materials = [newMaterial]
             } catch {
