@@ -13,9 +13,8 @@ class SpeechRecognitionService: ObservableObject {
     private let audioEngine = AVAudioEngine()
 
     private var pauseTimer: Timer?
-    private var currentTranscription = ""
-
-    @Published var conversationHistory: [String] = []
+    @Published var transcription: String?
+    @Published var finalTranscription: String?
     var onSpeechStarted: (() -> Void)?
     private var isMuted = false
 
@@ -34,10 +33,20 @@ class SpeechRecognitionService: ObservableObject {
 
     func mute() {
         isMuted = true
+        if audioEngine.isRunning {
+            audioEngine.pause()
+        }
     }
 
     func unmute() {
         isMuted = false
+        if !audioEngine.isRunning {
+            do {
+                try audioEngine.start()
+            } catch {
+                print("audioEngine couldn't start because of an error: \(error)")
+            }
+        }
     }
 
     func startListening() {
@@ -77,13 +86,12 @@ class SpeechRecognitionService: ObservableObject {
                     NotificationCenter.default.post(name: .userSaidStop, object: nil)
                 }
 
-                if !newTranscription.isEmpty && self.currentTranscription.isEmpty {
-                    // This is the first recognition result, so the user has started speaking.
+                if !newTranscription.isEmpty && self.transcription == nil {
                     self.onSpeechStarted?()
                 }
 
                 if !self.isMuted {
-                    self.currentTranscription = newTranscription
+                    self.transcription = newTranscription
                     self.resetPauseTimer()
                 }
             }
@@ -123,13 +131,17 @@ class SpeechRecognitionService: ObservableObject {
         pauseTimer = nil
 
         DispatchQueue.main.async {
-            if !self.currentTranscription.isEmpty {
-                self.conversationHistory.append(self.currentTranscription)
-                self.currentTranscription = ""
+            if let currentTranscription = self.transcription, !currentTranscription.isEmpty {
+                self.finalTranscription = currentTranscription
+                self.transcription = nil
+                self.clearFinalTranscription()
             }
         }
     }
 
+    func clearFinalTranscription() {
+        finalTranscription = nil
+    }
     private func resetPauseTimer() {
         pauseTimer?.invalidate()
         pauseTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { [weak self] _ in
@@ -137,9 +149,9 @@ class SpeechRecognitionService: ObservableObject {
 
             // This runs when the user has paused for 2.5 seconds
             DispatchQueue.main.async {
-                if !self.currentTranscription.isEmpty {
-                    self.conversationHistory.append(self.currentTranscription)
-                    self.currentTranscription = ""
+                if let currentTranscription = self.transcription, !currentTranscription.isEmpty {
+                    self.finalTranscription = currentTranscription
+                    self.transcription = nil
                 }
             }
         }

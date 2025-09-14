@@ -13,7 +13,7 @@ class TextToSpeechService: NSObject, AVSpeechSynthesizerDelegate {
     func speak(text: String) {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playAndRecord, mode: .default, options: .duckOthers)
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.duckOthers, .defaultToSpeaker])
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             print("Failed to set audio session for speech: \(error)")

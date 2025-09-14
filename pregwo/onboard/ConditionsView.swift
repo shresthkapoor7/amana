@@ -17,35 +17,41 @@ struct ConditionsView: View {
             Text("Do you have any of the following conditions?")
                 .font(.title)
                 .padding()
+            Text("You can select multiple conditions.")
+                .font(.subheadline)
+                .foregroundColor(.gray)
+                .padding(.bottom)
             
-            List(conditions, id: \.self) { condition in
-                Button(action: {
-                    if selectedConditions.contains(condition) {
-                        selectedConditions.removeAll { $0 == condition }
-                    } else {
-                        selectedConditions.append(condition)
-                    }
-                }) {
-                    HStack {
-                        Text(condition)
-                        if selectedConditions.contains(condition) {
-                            Spacer()
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-            }
+            MultiSelectView(options: conditions, selectedOptions: $selectedConditions)
             
             TextField("Other (comma separated)", text: $otherCondition)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
                 .padding()
             
             NavigationLink(destination: DietaryView()) {
                 Text("Next")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
             }
+            .padding(.horizontal)
             .simultaneousGesture(TapGesture().onEnded {
                 saveConditions()
             })
+            
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            hideKeyboard()
         }
     }
     

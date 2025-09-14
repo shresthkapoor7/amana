@@ -7,33 +7,42 @@ struct AnythingView: View {
 
     var body: some View {
         VStack {
-            Text("Is there anything else you want us to know about your food choices?")
+            Text("Anything else?")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .padding()
-
+            
             TextField("I like to follow omniHeart diet", text: $additionalInfo)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+                .padding()
+            
             Spacer()
-
+            
             Button(action: {
                 storedAdditionalInfo = additionalInfo
                 isFirstTime = false
             }) {
                 Text("Finish")
-                    .font(.headline)
-                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
                     .padding()
-                    .frame(width: 220, height: 60)
-                    .background(Color.blue)
-                    .cornerRadius(15.0)
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
             }
-            .padding()
+            .padding(.horizontal)
         }
         .padding()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
 }
 

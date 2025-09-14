@@ -52,6 +52,7 @@ struct ARViewContainer: UIViewRepresentable {
         private var cardAnchor: AnchorEntity?
         private var lastClearSignal: Int
         private var cancellables = Set<AnyCancellable>()
+        private var lastResponse: String?
 
         init(geminiService: GeminiService, initialClearSignal: Int, selectedTab: Binding<String>) {
             self.geminiService = geminiService
@@ -64,7 +65,7 @@ struct ARViewContainer: UIViewRepresentable {
 
             let location = sender.location(in: arView)
             if arView.entity(at: location) != nil {
-                if let message = geminiService.result {
+                if let message = self.lastResponse {
                     geminiService.clearMessages()
                     Task {
                         await geminiService.sendChatMessage(message: "expand on this: \(message)")
@@ -142,6 +143,7 @@ struct ARViewContainer: UIViewRepresentable {
                                 )
 
                                 DispatchQueue.main.async {
+                                    self.lastResponse = response
                                     self.updateCardTexture(with: response, nutrients: nutrients)
                                 }
                             }

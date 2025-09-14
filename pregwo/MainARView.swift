@@ -12,7 +12,6 @@ struct MainARView: View {
                 .ignoresSafeArea()
         }
         .onShake {
-            geminiService.result = nil
             clearSignal += 1
         }
     }

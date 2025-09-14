@@ -19,7 +19,7 @@ struct ChatView: View {
                                     .foregroundColor(.white)
                                     .cornerRadius(10)
                             } else {
-                                Text(LocalizedStringKey(message.text))
+                                Text(message.text.trimmingCharacters(in: .whitespacesAndNewlines))
                                     .padding(10)
                                     .background(Color(UIColor.systemGray5))
                                     .cornerRadius(10)
@@ -29,6 +29,9 @@ struct ChatView: View {
                     }
                 }
                 .padding()
+            }
+            .onTapGesture {
+                self.hideKeyboard()
             }
 
             HStack {
