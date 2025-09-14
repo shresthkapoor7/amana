@@ -21,22 +21,29 @@ struct AllergiesView: View {
                 .font(.title)
                 .padding()
             
-            List(allergies, id: \.self) { allergy in
-                Button(action: {
-                    if selectedAllergies.contains(allergy) {
-                        selectedAllergies.removeAll { $0 == allergy }
-                    } else {
-                        selectedAllergies.append(allergy)
-                    }
-                }) {
-                    HStack {
-                        Text(allergy)
-                        if selectedAllergies.contains(allergy) {
-                            Spacer()
-                            Image(systemName: "checkmark")
+            ScrollView {
+                VStack {
+                    ForEach(allergies, id: \.self) { allergy in
+                        Button(action: {
+                            if selectedAllergies.contains(allergy) {
+                                selectedAllergies.removeAll { $0 == allergy }
+                            } else {
+                                selectedAllergies.append(allergy)
+                            }
+                        }) {
+                            HStack {
+                                Text(allergy)
+                                if selectedAllergies.contains(allergy) {
+                                    Spacer()
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                            .foregroundColor(selectedAllergies.contains(allergy) ? .white : .primary)
+                            .padding()
+                            .background(selectedAllergies.contains(allergy) ? Color.accentColor : Color.gray.opacity(0.2))
+                            .cornerRadius(10)
                         }
                     }
-                    .foregroundColor(selectedAllergies.contains(allergy) ? .white : .primary)
                 }
             }
             
@@ -60,6 +67,12 @@ struct AllergiesView: View {
             .simultaneousGesture(TapGesture().onEnded {
                 saveAllergies()
             })
+            
+            Spacer()
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            hideKeyboard()
         }
     }
     

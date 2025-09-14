@@ -7,18 +7,18 @@ struct AnythingView: View {
 
     var body: some View {
         VStack {
-            Text("Is there anything else you want us to know about your food choices?")
+            Text("Anything else?")
                 .font(.largeTitle)
                 .fontWeight(.bold)
                 .multilineTextAlignment(.center)
                 .padding()
-
+            
             TextField("I like to follow omniHeart diet", text: $additionalInfo)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding()
-
+            
             Spacer()
-
+            
             Button(action: {
                 storedAdditionalInfo = additionalInfo
                 isFirstTime = false
@@ -37,6 +37,10 @@ struct AnythingView: View {
             .padding(.horizontal)
         }
         .padding()
+        .contentShape(Rectangle())
+        .onTapGesture {
+            hideKeyboard()
+        }
     }
 }
 
