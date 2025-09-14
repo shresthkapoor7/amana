@@ -7,6 +7,7 @@ struct CallView: View {
     @StateObject private var geminiService = GeminiService()
     private let ttsService = TextToSpeechService()
     @State private var subtitleText: String = ""
+    @State private var isLoading: Bool = false
 
     var body: some View {
         VStack {
@@ -18,7 +19,13 @@ struct CallView: View {
                     VStack {
                         Spacer()
 
-                        if !subtitleText.isEmpty {
+                        if isLoading && subtitleText.isEmpty {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .padding()
+                                .background(Color.black.opacity(0.5))
+                                .cornerRadius(10)
+                        } else if !subtitleText.isEmpty {
                             Text(subtitleText)
                                 .font(.caption)
                                 .foregroundColor(.white)
@@ -60,8 +67,10 @@ struct CallView: View {
                     cameraManager.captureFrame { image in
                         guard let image = image else { return }
                         Task {
+                            self.isLoading = true
                             let response = await geminiService.sendChatMessageWithImage(for: image, message: transcription)
-                            self.subtitleText = response
+                            self.subtitleText = response.trimmingCharacters(in: .whitespacesAndNewlines)
+                            self.isLoading = false
                             ttsService.speak(text: response)
                             speechService.clearFinalTranscription()
                         }
