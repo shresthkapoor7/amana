@@ -6,6 +6,7 @@ struct CallView: View {
     @StateObject private var speechService = SpeechRecognitionService()
     @StateObject private var geminiService = GeminiService()
     private let ttsService = TextToSpeechService()
+    @State private var subtitleText: String = ""
 
     var body: some View {
         VStack {
@@ -15,91 +16,52 @@ struct CallView: View {
                         .ignoresSafeArea()
 
                     VStack {
-                        // Display for spoken text
-                        if let lastMessage = speechService.conversationHistory.last {
-                            Text(lastMessage)
-                                .font(.title2)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.black.opacity(0.7))
-                                .cornerRadius(10)
-                                .transition(.opacity)
-                                .padding(.top)
-                        }
-
-                        // Display for Gemini's response
-                        if let geminiResponse = geminiService.result, !geminiResponse.isEmpty {
-                            Text(geminiResponse)
-                                .font(.title2)
-                                .foregroundColor(.white)
-                                .padding()
-                                .background(Color.blue.opacity(0.7))
-                                .cornerRadius(10)
-                                .transition(.opacity)
-                                .padding(.top)
-                        }
-
                         Spacer()
 
-                        // Controls at the bottom
+                        if !subtitleText.isEmpty {
+                            Text(subtitleText)
+                                .font(.caption)
+                                .foregroundColor(.white)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 5)
+                                .background(Color.black.opacity(0.7))
+                                .cornerRadius(8)
+                                .transition(.opacity.animation(.easeInOut))
+                                .padding(.horizontal)
+                        }
+
                         HStack {
                             Spacer()
-
-                            Button(action: {
-                                speechService.conversationHistory.removeAll()
-                                geminiService.result = nil
-                                geminiService.endChat()
-                                ttsService.stop()
-                                isCallActive = false
-                            }) {
+                            Button(action: endCall) {
                                 Image(systemName: "phone.down.fill")
                                     .padding()
                             }
                             .background(Color.red)
                             .foregroundColor(.white)
-                            .clipShape( Circle() )
-
+                            .clipShape(Circle())
                             Spacer()
                         }
                         .padding(.bottom, 20)
                     }
                 }
-                .onAppear {
-                    cameraManager.start()
-                    speechService.startListening()
-                    geminiService.startChat()
-
-                    speechService.onSpeechStarted = {
-                        ttsService.stop()
-                    }
-
-                    ttsService.onSpeechStarted = {
-                        speechService.mute()
-                    }
-
-                    ttsService.onSpeechFinished = {
-                        speechService.unmute()
-                    }
-                }
-                .onDisappear {
-                    cameraManager.stop()
-                    speechService.stopListening()
-                    geminiService.endChat()
-                }
+                .onAppear(perform: startCall)
+                .onDisappear(perform: endCall)
                 .onReceive(NotificationCenter.default.publisher(for: .userSaidStop)) { _ in
                     ttsService.stop()
                 }
-                .onChange(of: speechService.conversationHistory) {
-                    guard let lastMessage = speechService.conversationHistory.last else { return }
-
+                .onChange(of: speechService.transcription) { newTranscription in
+                    if let transcription = newTranscription, !transcription.isEmpty {
+                        self.subtitleText = transcription
+                    }
+                }
+                .onChange(of: speechService.finalTranscription) { newTranscription in
+                    guard let transcription = newTranscription, !transcription.isEmpty else { return }
+                    
                     cameraManager.captureFrame { image in
                         guard let image = image else { return }
-
                         Task {
-                            let response = await geminiService.sendChatMessageWithImage(
-                                for: image,
-                                message: lastMessage
-                            )
+                            let response = await geminiService.sendChatMessageWithImage(for: image, message: transcription)
+                            self.subtitleText = response
                             ttsService.speak(text: response)
                         }
                     }
@@ -116,5 +78,34 @@ struct CallView: View {
                 .cornerRadius(10)
             }
         }
+    }
+
+    private func startCall() {
+        cameraManager.start()
+        speechService.startListening()
+        geminiService.startChat()
+
+        speechService.onSpeechStarted = {
+            ttsService.stop()
+            self.subtitleText = ""
+        }
+
+        ttsService.onSpeechStarted = {
+            speechService.mute()
+        }
+
+        ttsService.onSpeechFinished = {
+            speechService.unmute()
+            self.subtitleText = ""
+        }
+    }
+
+    private func endCall() {
+        cameraManager.stop()
+        speechService.stopListening()
+        geminiService.endChat()
+        ttsService.stop()
+        subtitleText = ""
+        isCallActive = false
     }
 }

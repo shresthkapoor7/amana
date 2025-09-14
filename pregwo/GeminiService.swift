@@ -15,7 +15,6 @@ struct NutrientData: Codable {
 class GeminiService: ObservableObject {
     private var generativeModel: GenerativeModel?
     private var chat: Chat?
-    @Published var result: String?
     @Published var inProgress = false
     @Published var messages: [ChatMessage] = []
 
@@ -81,7 +80,6 @@ class GeminiService: ObservableObject {
     func generateIsolatedResponse(for image: UIImage, conversation: [String]) async -> (String, NutrientData?) {
         guard let model = generativeModel else {
             let errorText = "Generative model not available."
-            self.result = errorText
             return (errorText, nil)
         }
 
@@ -112,13 +110,10 @@ class GeminiService: ObservableObject {
             let resultText = response.text ?? "No response text found."
 
             let cleanedText = cleanTextFromJSON(from: resultText)
-            self.result = cleanedText
-
             let nutrientData = parseNutrientData(from: resultText)
             return (cleanedText, nutrientData)
         } catch {
             let errorText = "Error: \(error.localizedDescription)"
-            self.result = errorText
             return (errorText, nil)
         }
     }
@@ -166,9 +161,7 @@ class GeminiService: ObservableObject {
     @MainActor
     func sendChatMessageWithImage(for image: UIImage, message: String) async -> String {
         guard let chat = self.chat else {
-            let errorText = "Chat session not started."
-            self.result = errorText
-            return errorText
+            return "Chat session not started."
         }
 
         inProgress = true
@@ -179,13 +172,9 @@ class GeminiService: ObservableObject {
 
         do {
             let response = try await chat.sendMessage(fullMessage, image)
-            let resultText = response.text ?? "No response text found."
-            self.result = resultText
-            return resultText
+            return response.text ?? "No response text found."
         } catch {
-            let errorText = "Error: \(error.localizedDescription)"
-            self.result = errorText
-            return errorText
+            return "Error: \(error.localizedDescription)"
         }
     }
 
