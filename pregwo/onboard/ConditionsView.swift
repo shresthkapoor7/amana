@@ -22,32 +22,7 @@ struct ConditionsView: View {
                 .foregroundColor(.gray)
                 .padding(.bottom)
             
-            ScrollView {
-                VStack {
-                    ForEach(conditions, id: \.self) { condition in
-                        Button(action: {
-                            if self.selectedConditions.contains(condition) {
-                                self.selectedConditions.removeAll { $0 == condition }
-                            } else {
-                                self.selectedConditions.append(condition)
-                            }
-                        }) {
-                            HStack {
-                                Text(condition)
-                                    .foregroundColor(.primary)
-                                if self.selectedConditions.contains(condition) {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.accentColor)
-                                }
-                            }
-                            .padding()
-                            .background(self.selectedConditions.contains(condition) ? Color.accentColor : Color.gray.opacity(0.2))
-                            .cornerRadius(10)
-                        }
-                    }
-                }
-            }
+            MultiSelectView(options: conditions, selectedOptions: $selectedConditions)
             
             TextField("Other (comma separated)", text: $otherCondition)
                 .textFieldStyle(RoundedBorderTextFieldStyle())

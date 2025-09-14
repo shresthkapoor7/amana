@@ -21,31 +21,7 @@ struct AllergiesView: View {
                 .font(.title)
                 .padding()
             
-            ScrollView {
-                VStack {
-                    ForEach(allergies, id: \.self) { allergy in
-                        Button(action: {
-                            if selectedAllergies.contains(allergy) {
-                                selectedAllergies.removeAll { $0 == allergy }
-                            } else {
-                                selectedAllergies.append(allergy)
-                            }
-                        }) {
-                            HStack {
-                                Text(allergy)
-                                if selectedAllergies.contains(allergy) {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                }
-                            }
-                            .foregroundColor(selectedAllergies.contains(allergy) ? .white : .primary)
-                            .padding()
-                            .background(selectedAllergies.contains(allergy) ? Color.accentColor : Color.gray.opacity(0.2))
-                            .cornerRadius(10)
-                        }
-                    }
-                }
-            }
+            MultiSelectView(options: allergies, selectedOptions: $selectedAllergies)
             
             TextField("Other (comma separated)", text: $otherAllergy)
                 .textFieldStyle(RoundedBorderTextFieldStyle())

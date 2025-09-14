@@ -26,32 +26,7 @@ struct DietaryView: View {
                 .foregroundColor(.gray)
                 .padding(.bottom)
             
-            ScrollView {
-                VStack {
-                    ForEach(restrictions, id: \.self) { restriction in
-                        Button(action: {
-                            if self.selectedRestrictions.contains(restriction) {
-                                self.selectedRestrictions.removeAll { $0 == restriction }
-                            } else {
-                                self.selectedRestrictions.append(restriction)
-                            }
-                        }) {
-                            HStack {
-                                Text(restriction)
-                                    .foregroundColor(.primary)
-                                if self.selectedRestrictions.contains(restriction) {
-                                    Spacer()
-                                    Image(systemName: "checkmark")
-                                        .foregroundColor(.accentColor)
-                                }
-                            }
-                            .padding()
-                            .background(self.selectedRestrictions.contains(restriction) ? Color.accentColor : Color.gray.opacity(0.2))
-                            .cornerRadius(10)
-                        }
-                    }
-                }
-            }
+            MultiSelectView(options: restrictions, selectedOptions: $selectedRestrictions)
             
             TextField("Other (comma separated)", text: $otherRestriction)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
