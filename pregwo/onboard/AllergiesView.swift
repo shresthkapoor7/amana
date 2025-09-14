@@ -36,6 +36,7 @@ struct AllergiesView: View {
                             Image(systemName: "checkmark")
                         }
                     }
+                    .foregroundColor(selectedAllergies.contains(allergy) ? .white : .primary)
                 }
             }
             
