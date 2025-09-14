@@ -42,6 +42,7 @@ struct ContentView: View {
                 .tag("Settings")
         }
         .onAppear {
+            geminiService.startChat()
             let tabBarAppearance = UITabBarAppearance()
             tabBarAppearance.configureWithOpaqueBackground()
             tabBarAppearance.backgroundColor = .black

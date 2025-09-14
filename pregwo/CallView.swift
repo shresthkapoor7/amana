@@ -107,6 +107,7 @@ struct CallView: View {
             } else {
                 Button("Start a Call") {
                     isCallActive = true
+                    geminiService.startChat()
                 }
                 .font(.title)
                 .padding()

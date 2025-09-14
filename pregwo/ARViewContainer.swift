@@ -133,16 +133,16 @@ struct ARViewContainer: UIViewRepresentable {
                             // Get response and update the card's texture
                             Task { [weak self] in
                                 guard let self = self, let img = image else { return }
-                                let response = await self.geminiService.generateIsolatedResponse(
+                                let (response, nutrients) = await self.geminiService.generateIsolatedResponse(
                                     for: img,
                                     conversation: [
-                                        "You are an AI assistant seeing the world through the user's camera. Respond conversationally and do not mention 'the image'.",
-                                        "what is the object in users hand"
+                                        "You are an AI nurse seeing the world through the user's camera. Respond conversationally and do not mention 'the image'.",
+                                        "If the user should eat it or not, and why."
                                     ]
                                 )
 
                                 DispatchQueue.main.async {
-                                    self.updateCardTexture(with: response)
+                                    self.updateCardTexture(with: response, nutrients: nutrients)
                                 }
                             }
                         }
@@ -228,11 +228,11 @@ struct ARViewContainer: UIViewRepresentable {
         }
 
         @MainActor
-        private func updateCardTexture(with markdownText: String) {
+        private func updateCardTexture(with markdownText: String, nutrients: NutrientData?) {
             guard let cardAnchor = self.cardAnchor,
                   let cardEntity = cardAnchor.findEntity(named: "geminiCard") as? ModelEntity else { return }
 
-            guard let textureImage = MarkdownRenderer.render(markdown: markdownText),
+            guard let textureImage = MarkdownRenderer.render(markdown: markdownText, nutrients: nutrients),
                   let cgImage = textureImage.cgImage else { return }
 
             // Calculate the aspect ratio of the rendered image

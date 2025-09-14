@@ -28,7 +28,7 @@ struct NutrientView: View {
 
 class MarkdownRenderer {
     @MainActor
-    static func render(markdown: String, width: CGFloat = 1024) -> UIImage? {
+    static func render(markdown: String, nutrients: NutrientData?, width: CGFloat = 1024) -> UIImage? {
         let content = VStack(alignment: .leading, spacing: 20) {
             if !markdown.isEmpty {
                 Text(markdown)
@@ -39,13 +39,15 @@ class MarkdownRenderer {
                 Divider().background(Color.white)
             }
 
-            VStack(alignment: .leading, spacing: 10) {
-                NutrientView(label: "Calories", value: 80, color: .green)
-                NutrientView(label: "Protein", value: 20, color: .cyan)
-                NutrientView(label: "Carbs", value: 5, color: .yellow)
-                NutrientView(label: "Fat", value: 15, color: .orange)
-                NutrientView(label: "Vitamins & minerals", value: 90, color: .purple)
-                NutrientView(label: "Safety", value: 95, color: .red)
+            if let nutrients = nutrients {
+                VStack(alignment: .leading, spacing: 10) {
+                    NutrientView(label: "Calories", value: nutrients.calories, color: .green)
+                    NutrientView(label: "Protein", value: nutrients.protein, color: .cyan)
+                    NutrientView(label: "Carbs", value: nutrients.carbs, color: .yellow)
+                    NutrientView(label: "Fat", value: nutrients.fat, color: .orange)
+                    NutrientView(label: "Vitamins & minerals", value: nutrients.vitaminsAndMinerals, color: .purple)
+                    NutrientView(label: "Safety", value: nutrients.safety, color: .red)
+                }
             }
         }
         .padding(40)
