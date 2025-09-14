@@ -25,7 +25,7 @@ struct MultiSelectView: View {
                                 .foregroundColor(selectedOptions.contains(option) ? .white : .primary)
                                 .padding()
                                 .frame(maxWidth: .infinity, minHeight: 80)
-                                .background(selectedOptions.contains(option) ? Color.accentColor : Color.gray.opacity(0.2))
+                                .background(selectedOptions.contains(option) ? Color.accentColor : Color(.systemGray6))
                                 .cornerRadius(10)
                         }
                     }

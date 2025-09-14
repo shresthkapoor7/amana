@@ -14,7 +14,9 @@ struct AnythingView: View {
                 .padding()
             
             TextField("I like to follow omniHeart diet", text: $additionalInfo)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
                 .padding()
             
             Spacer()

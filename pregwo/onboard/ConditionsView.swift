@@ -25,7 +25,9 @@ struct ConditionsView: View {
             MultiSelectView(options: conditions, selectedOptions: $selectedConditions)
             
             TextField("Other (comma separated)", text: $otherCondition)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
                 .padding()
             
             NavigationLink(destination: DietaryView()) {

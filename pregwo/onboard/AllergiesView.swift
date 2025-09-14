@@ -24,7 +24,9 @@ struct AllergiesView: View {
             MultiSelectView(options: allergies, selectedOptions: $selectedAllergies)
             
             TextField("Other (comma separated)", text: $otherAllergy)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
                 .padding()
             
             NavigationLink(destination: AnythingView()) {

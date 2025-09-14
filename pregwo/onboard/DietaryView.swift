@@ -29,7 +29,9 @@ struct DietaryView: View {
             MultiSelectView(options: restrictions, selectedOptions: $selectedRestrictions)
             
             TextField("Other (comma separated)", text: $otherRestriction)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .padding()
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
                 .padding()
             
             NavigationLink(destination: AllergiesView()) {
