@@ -30,7 +30,7 @@ class GeminiService: ObservableObject {
                 .text(initialPrompt)
             ]),
             ModelContent(role: "model", parts: [
-                .text("OK, I will format all my responses in markdown and act as a helpful nurse for a pregnant woman with the provided details.")
+                .text("OK, I will format all my responses in markdown and act as a helpful nurse for a pregnant woman with the provided details. Keep your responses short.")
             ])
         ])
     }

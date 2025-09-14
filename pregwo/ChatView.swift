@@ -30,6 +30,9 @@ struct ChatView: View {
                 }
                 .padding()
             }
+            .onTapGesture {
+                self.hideKeyboard()
+            }
 
             HStack {
                 TextField("Type a message...", text: $newMessageText)
