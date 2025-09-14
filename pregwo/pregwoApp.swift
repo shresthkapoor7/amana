@@ -11,7 +11,7 @@ import SwiftUI
 struct pregwoApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            SplashScreen()
         }
     }
 }

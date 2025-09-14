@@ -275,10 +275,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = R97T42N8LN;
+				DEVELOPMENT_TEAM = J5QV3M53BS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = pregwo/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Amana;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "i need this plz";
 				INFOPLIST_KEY_NSFileProviderDomainUsageDescription = "$(MARKETING_VERSION)";
@@ -309,10 +310,11 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = R97T42N8LN;
+				DEVELOPMENT_TEAM = J5QV3M53BS;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = pregwo/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Amana;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
 				INFOPLIST_KEY_NSCameraUsageDescription = "i need this plz";
 				INFOPLIST_KEY_NSFileProviderDomainUsageDescription = "$(MARKETING_VERSION)";
