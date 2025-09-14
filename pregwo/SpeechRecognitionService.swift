@@ -134,10 +134,14 @@ class SpeechRecognitionService: ObservableObject {
             if let currentTranscription = self.transcription, !currentTranscription.isEmpty {
                 self.finalTranscription = currentTranscription
                 self.transcription = nil
+                self.clearFinalTranscription()
             }
         }
     }
 
+    func clearFinalTranscription() {
+        finalTranscription = nil
+    }
     private func resetPauseTimer() {
         pauseTimer?.invalidate()
         pauseTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { [weak self] _ in

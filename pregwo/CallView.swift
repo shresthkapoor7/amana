@@ -63,6 +63,7 @@ struct CallView: View {
                             let response = await geminiService.sendChatMessageWithImage(for: image, message: transcription)
                             self.subtitleText = response
                             ttsService.speak(text: response)
+                            speechService.clearFinalTranscription()
                         }
                     }
                 }
@@ -88,6 +89,7 @@ struct CallView: View {
         speechService.onSpeechStarted = {
             ttsService.stop()
             self.subtitleText = ""
+            speechService.clearFinalTranscription()
         }
 
         ttsService.onSpeechStarted = {
