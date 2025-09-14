@@ -1,5 +1,6 @@
 import SwiftUI
 
+
 struct CallView: View {
     @State private var isCallActive = false
     @StateObject private var cameraManager = SimpleCameraManager()
