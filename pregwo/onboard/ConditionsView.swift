@@ -42,10 +42,23 @@ struct ConditionsView: View {
             
             NavigationLink(destination: DietaryView()) {
                 Text("Next")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 10)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
             }
+            .padding(.horizontal)
             .simultaneousGesture(TapGesture().onEnded {
                 saveConditions()
             })
+        }
+        .onTapGesture {
+            UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
         }
     }
     
