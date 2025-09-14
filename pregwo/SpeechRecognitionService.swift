@@ -17,6 +17,7 @@ class SpeechRecognitionService: ObservableObject {
 
     @Published var conversationHistory: [String] = []
     var onSpeechStarted: (() -> Void)?
+    private var isMuted = false
 
     init() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
@@ -29,6 +30,14 @@ class SpeechRecognitionService: ObservableObject {
                 }
             }
         }
+    }
+
+    func mute() {
+        isMuted = true
+    }
+
+    func unmute() {
+        isMuted = false
     }
 
     func startListening() {
@@ -72,8 +81,11 @@ class SpeechRecognitionService: ObservableObject {
                     // This is the first recognition result, so the user has started speaking.
                     self.onSpeechStarted?()
                 }
-                self.currentTranscription = newTranscription
-                self.resetPauseTimer()
+
+                if !self.isMuted {
+                    self.currentTranscription = newTranscription
+                    self.resetPauseTimer()
+                }
             }
 
             if error != nil || result?.isFinal == true {

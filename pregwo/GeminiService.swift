@@ -69,12 +69,8 @@ class GeminiService: ObservableObject {
         inProgress = true
         defer { inProgress = false }
 
-        var fullMessage = message
-        // If this is the first message from the user, prepend the system instruction.
-        if chat.history.isEmpty {
-            let systemInstruction = "You are on a video call. The user is showing you things through their camera. Respond to their questions naturally and conversationally. Do not refer to what you see as 'the image' or 'the picture'."
-            fullMessage = "\(systemInstruction)\n\nUser: \(message)"
-        }
+        let systemInstruction = "You are on a video call. The user is showing you things through their camera. Respond to their questions naturally and conversationally. Do not refer to what you see as 'the image' or 'the picture'."
+        let fullMessage = "\(systemInstruction)\n\nUser: \(message)"
 
         do {
             let response = try await chat.sendMessage(fullMessage, image)

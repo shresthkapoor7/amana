@@ -49,6 +49,7 @@ struct CallView: View {
                                 speechService.conversationHistory.removeAll()
                                 geminiService.result = nil
                                 geminiService.endChat()
+                                ttsService.stop()
                                 isCallActive = false
                             }) {
                                 Image(systemName: "phone.down.fill")
@@ -70,6 +71,14 @@ struct CallView: View {
 
                     speechService.onSpeechStarted = {
                         ttsService.stop()
+                    }
+
+                    ttsService.onSpeechStarted = {
+                        speechService.mute()
+                    }
+
+                    ttsService.onSpeechFinished = {
+                        speechService.unmute()
                     }
                 }
                 .onDisappear {

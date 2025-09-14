@@ -1,7 +1,14 @@
 import AVFoundation
 
-class TextToSpeechService {
+class TextToSpeechService: NSObject, AVSpeechSynthesizerDelegate {
     private let synthesizer = AVSpeechSynthesizer()
+    var onSpeechStarted: (() -> Void)?
+    var onSpeechFinished: (() -> Void)?
+
+    override init() {
+        super.init()
+        synthesizer.delegate = self
+    }
 
     func speak(text: String) {
         do {
@@ -29,5 +36,13 @@ class TextToSpeechService {
         if synthesizer.isSpeaking {
             synthesizer.stopSpeaking(at: .immediate)
         }
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
+        onSpeechStarted?()
+    }
+
+    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
+        onSpeechFinished?()
     }
 }
