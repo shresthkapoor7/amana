@@ -64,7 +64,7 @@ struct CallView: View {
                 }
                 .onChange(of: speechService.finalTranscription) { newTranscription in
                     guard let transcription = newTranscription, !transcription.isEmpty else { return }
-                    
+
                     cameraManager.captureFrame { image in
                         guard let image = image else { return }
                         Task {
@@ -74,6 +74,7 @@ struct CallView: View {
                             self.isLoading = false
                             ttsService.speak(text: response)
                             speechService.clearFinalTranscription()
+                            speechService.startListening()
                         }
                     }
                 }
@@ -98,8 +99,8 @@ struct CallView: View {
 
         speechService.onSpeechStarted = {
             ttsService.stop()
+            speechService.unmute()
             self.subtitleText = ""
-            speechService.clearFinalTranscription()
         }
 
         ttsService.onSpeechStarted = {

@@ -17,6 +17,7 @@ class SpeechRecognitionService: ObservableObject {
     @Published var finalTranscription: String?
     var onSpeechStarted: (() -> Void)?
     private var isMuted = false
+    private var speechHasStarted = false
 
     init() {
         SFSpeechRecognizer.requestAuthorization { authStatus in
@@ -33,25 +34,16 @@ class SpeechRecognitionService: ObservableObject {
 
     func mute() {
         isMuted = true
-        if audioEngine.isRunning {
-            audioEngine.pause()
-        }
     }
 
     func unmute() {
         isMuted = false
-        if !audioEngine.isRunning {
-            do {
-                try audioEngine.start()
-            } catch {
-                print("audioEngine couldn't start because of an error: \(error)")
-            }
-        }
     }
 
     func startListening() {
         guard !audioEngine.isRunning else { return }
 
+        speechHasStarted = false
         if recognitionTask != nil {
             recognitionTask?.cancel()
             recognitionTask = nil
@@ -59,7 +51,7 @@ class SpeechRecognitionService: ObservableObject {
 
         let audioSession = AVAudioSession.sharedInstance()
         do {
-            try audioSession.setCategory(.playAndRecord, mode: .measurement, options: .duckOthers)
+            try audioSession.setCategory(.playAndRecord, mode: .voiceChat, options: .duckOthers)
             try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
         } catch {
             print("Audio session setup error: \(error)")
@@ -81,19 +73,20 @@ class SpeechRecognitionService: ObservableObject {
             if let result = result {
                 let newTranscription = result.bestTranscription.formattedString
 
+                if !newTranscription.isEmpty && !self.speechHasStarted {
+                    self.speechHasStarted = true
+                    self.onSpeechStarted?()
+                }
+
                 // Check for the "stop" command
                 if newTranscription.lowercased().contains("ok stop") || newTranscription.lowercased().contains("okay stop") {
                     NotificationCenter.default.post(name: .userSaidStop, object: nil)
                 }
 
-                if !newTranscription.isEmpty && self.transcription == nil {
-                    self.onSpeechStarted?()
-                }
-
                 if !self.isMuted {
                     self.transcription = newTranscription
-                    self.resetPauseTimer()
                 }
+                self.resetPauseTimer()
             }
 
             if error != nil || result?.isFinal == true {
@@ -103,6 +96,15 @@ class SpeechRecognitionService: ObservableObject {
 
         let recordingFormat = inputNode.outputFormat(forBus: 0)
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, when) in
+            let gain: Float = 7.0
+            if let channelData = buffer.floatChannelData {
+                for channel in 0..<Int(buffer.format.channelCount) {
+                    let channelBuffer = channelData[channel]
+                    for i in 0..<Int(buffer.frameLength) {
+                        channelBuffer[i] *= gain
+                    }
+                }
+            }
             self.recognitionRequest?.append(buffer)
         }
 
@@ -134,7 +136,6 @@ class SpeechRecognitionService: ObservableObject {
             if let currentTranscription = self.transcription, !currentTranscription.isEmpty {
                 self.finalTranscription = currentTranscription
                 self.transcription = nil
-                self.clearFinalTranscription()
             }
         }
     }
@@ -145,15 +146,7 @@ class SpeechRecognitionService: ObservableObject {
     private func resetPauseTimer() {
         pauseTimer?.invalidate()
         pauseTimer = Timer.scheduledTimer(withTimeInterval: 2.5, repeats: false) { [weak self] _ in
-            guard let self = self else { return }
-
-            // This runs when the user has paused for 2.5 seconds
-            DispatchQueue.main.async {
-                if let currentTranscription = self.transcription, !currentTranscription.isEmpty {
-                    self.finalTranscription = currentTranscription
-                    self.transcription = nil
-                }
-            }
+            self?.stopListening()
         }
     }
 }
