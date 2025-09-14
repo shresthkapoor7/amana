@@ -17,9 +17,14 @@ struct AllergiesView: View {
     
     var body: some View {
         VStack {
-            Text("Do you have any allergies?")
-                .font(.title)
-                .padding()
+            VStack {
+                Text("Do you have any allergies?")
+                    .font(.title)
+                Text("You can choose multiple")
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+            }
+            .padding()
             
             MultiSelectView(options: allergies, selectedOptions: $selectedAllergies)
             
