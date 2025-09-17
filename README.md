@@ -27,7 +27,7 @@ Amana was created to provide **accessible, reliable, and personalized care**, fi
 
 - **iOS (Swift)** – Native app development  
 - **ARKit** – Real-time AR overlays for grocery guidance  
-- **Google Gemini API (Gemini Pro & Vision)** – AI for diet plans, video guidance, and object recognition  
+- **Vision I** – AI for diet plans, video guidance, and object recognition  
 - **Xcode** – Development environment  
 
 ---
