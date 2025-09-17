@@ -58,5 +58,5 @@ Amana was created to provide **accessible, reliable, and personalized care**, fi
 
 ---
 
-## 📂 Repository Structure
+
 
